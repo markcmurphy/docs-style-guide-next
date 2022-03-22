@@ -50,12 +50,17 @@ const glossery = require('./modules/write-good/glossery.js');
 import { json } from 'express';
 import multer from 'multer';
 import nextConnect from 'next-connect';
+import { VFile } from 'vfile';
+
+const storage = multer.memoryStorage();
 
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: './public/uploads',
-    filename: (req, file, cb) => cb(null, file.originalname),
-  }),
+  storage: storage,
+  // });
+  // storage: multer.diskStorage({
+  //   destination: './public/uploads',
+  //   filename: (req, file, cb) => cb(null, file.originalname),
+  // }),
 });
 
 const apiRoute = nextConnect({
@@ -73,59 +78,11 @@ const uploadMiddleware = upload.single('file');
 
 apiRoute.use(uploadMiddleware);
 
-// const docMD = require('./test.md');
-
-// const cli = meow(
-//   `
-//     Usage
-//       $ quality-docs <glob>
-
-//     Options
-//       -c, --config  A JSON config file to override default linting rules.
-//       -i, --ignore  A word or phrase to ignore and add to the config file's list.
-//       -s, --silent  Silent mode. Mutes warnings and only shows fatal errors.
-//       -v, --verbose Prints which config is used.
-
-//     Examples
-//       $ quality-docs --config custom-config.json
-// `,
-//   {
-//     alias: {
-//       c: 'config',
-//       i: 'ignore',
-//       s: 'silent',
-//       v: 'verbose',
-//     },
-//   }
-// );
-
 // var silent = cli.flags.silent || false;
 
-// export default async function handler(req, res) {
 apiRoute.post((req, res) => {
-  console.log(req.body);
-  //   if (req.method === 'POST') {
-  //   let doc =
-  //     "# BigCommerce Channels Overview BigCommerces Channel Manager is the central place for merchants to discover, connect to, and manage their sales channels, including external channels like eBay, Amazon, Facebook, and Instagram. These external sales channels can extend the merchant's control panel experience in a number of ways, such as pushing orders from these external channels into the control panel alongside their BigCommerce storefront orders, allowing them to be fulfilled in the same way, and managing products on these channel from within the control panel in many of the same ways as they do for their BigCommerce storefronts.";
-
-  //   console.log('🚀 ~ file: lint.js ~ line 79 ~ handler ~ doc', doc);
-
   var silent = false;
-
   // // Build array of files that match input glob
-  var docFiles = [];
-  docFiles.push(req.file.path);
-  //   console.log('🚀 ~ file: lint.js ~ line 117 ~ apiRoute.post ~ req.body', req);
-  //   console.log('🚀 ~ file: lint.js ~ line 90 ~ handler ~ docFiles', docFiles);
-
-  //   req.files.forEach((file) => {
-  //     if (!file.includes('*')) docFiles.push(file);
-  //   });
-  //   if (docFiles.length <= 0) {
-  //     console.warn('No files found to lint.');
-  //     process.exit(1);
-  //   }
-  // let branchId = JSON.parse(req.body).branch;
 
   // // Use --config file if provided, otherwise defaults
   var config = {};
@@ -153,7 +110,7 @@ apiRoute.post((req, res) => {
   //         JSON.stringify(rules, null, 2),
   //         function (err) {
   //           if (err) {
-  //             return console.log(err);
+  //             return
   //           }
   //           console.log(
   //             "Added '" +
@@ -409,168 +366,144 @@ apiRoute.post((req, res) => {
   var ignoreWords = _.difference(config.ignore, config.noIgnore);
 
   // if (cli.flags.verbose) {
-  //   console.log(chalk.red.underline('Fatal rules:\n'), chalk.red(fatalRules));
-  //   console.log(chalk.yellow.underline('Warnings:\n'), chalk.yellow(warnRules));
-  //   console.log(chalk.gray.underline('Suggestions:\n'), chalk.gray(suggestRules));
-  //   console.log(chalk.green.underline('Ignoring:\n'), chalk.green(ignoreWords));
+  //
+  //
+  //
+  //
   // }
 
-  map(docFiles, toVFile.read, function (err, files) {
-    // console.log('🚀 ~ file: lint.js ~ line 388 ~ files', files);
-    // console.log('🚀 ~ file: lint.js ~ line 388 ~ docFiles', docFiles);
-    var hasErrors = false;
+  const stream = req.file.buffer;
 
-    map(files, checkFile, function (err, results) {
-      //   console.log('🚀 ~ file: lint.js ~ line 424 ~ results', report(results));
-      //   report(err || results, {
-      //     silent: silent,
-      //   });
-      let resultArr = [];
+  function checkFile(file) {
+    remark()
+      // TODO: fix MD lint rules
+      // .use(linterRules)
+      .use(validateLinks, {})
+      .use(validateExternalLinks, {
+        skipLocalhost: true,
+        skipUrlPatterns: ['https://github.com', '//s3.amazonaws.com'],
+        gotOptions: {
+          // baseUrl: 'https://developer-beta.bigcommerce.com',
+          baseUrl: 'https://developer.bigcommerce.com',
+        },
+      })
+      .use(writeGood, {
+        checks: dateFormat,
+        whitelist: ignoreWords,
+      })
+      .use(writeGood, {
+        checks: ellipses,
+        whitelist: ignoreWords,
+      })
+      .use(writeGood, {
+        checks: emdash,
+        whitelist: ignoreWords,
+      })
+      .use(writeGood, {
+        checks: exclamation,
+        whitelist: ignoreWords,
+      })
+      .use(writeGood, {
+        checks: general,
+        whitelist: ignoreWords,
+      })
+      .use(writeGood, {
+        checks: firstPerson,
+        whitelist: ignoreWords,
+      })
+      .use(writeGood, {
+        checks: writeGoodExtension,
+        whitelist: ignoreWords.concat('In order to'),
+        // ignore: ignoreWords.concat(['in order to']),
+      })
+      // TODO: consolidate some writeGood modules
+      .use(
+        remark2retext,
+        retext() // Convert markdown to plain text
+          // TODO: configure readability thresholds to make it useful
+          // .use(readability, readabilityConfig || {})
+          // TODO: configure simplify to be less sensitive
+          .use(simplify, {
+            ignore: ignoreWords.concat([
+              'multiple',
+              'render',
+              'forward',
+              'should',
+              'in order to',
+            ]),
+          })
+          .use(writeGoodWordNode, {
+            whitelist: ignoreWords.concat(['as']),
+            checks: glossery,
+          })
+          .use(equality, {
+            ignore: ignoreWords.concat([
+              'just',
+              'easy',
+              'disable',
+              'disabled',
+              'host',
+            ]),
+          })
+          .use(syntaxURLS)
+          // .use(intensify, {
+          //   ignore: ignoreWords.concat([]),
+          // })
+          .use(repeatedWords)
+          .use(indefiniteArticles)
+          .use(assuming, {
+            ignore: ignoreWords.concat([]),
+          })
+          // TODO: have spell not check URLS or file names
+          .use(spell, {
+            dictionary: dictionary,
+            ignore: ignoreWords.concat([]),
+            ignoreLiteral: true,
+          })
+      )
+      // plugin to enable, disable, and ignore messages.
+      .use(control, {
+        name: 'quality-docs',
+        source: [
+          'remark-lint',
+          'remark-lint-write-good',
+          'retext-readability',
+          'retext-simplify',
+          'retext-equality',
+          'retext-intensify',
+          'retext-google-styleguide',
+        ],
+      })
+      .process(file, function (err, results) {
+        var filteredMessages = [];
 
-      // Check for errors and exit with error code if found
-      results.forEach((result) => {
-        result.messages.forEach((message) => {
-          resultArr.push(message);
-          //   console.log(message.line, message.reason);
-          if (message.fatal) hasErrors = true;
+        results.messages.forEach((message) => {
+          var hasFatalRuleId = _.includes(fatalRules, message.ruleId);
+          var hasFatalSource = _.includes(fatalRules, message.source);
+          var hasSuggestedRuleId = _.includes(suggestRules, message.ruleId);
+          var hasSuggestedSource = _.includes(suggestRules, message.source);
+
+          if (suggestRules && (hasSuggestedRuleId || hasSuggestedSource)) {
+            message.message = message.message.replace(
+              /don\’t use “(.*)”/gi,
+              (match, word) => {
+                return 'Use “' + word + '” sparingly';
+              }
+            );
+            delete message.fatal;
+          }
+
+          if (fatalRules && (hasFatalRuleId || hasFatalSource)) {
+            message.fatal = true;
+          }
+
+          filteredMessages.push(message);
         });
+        res.send(filteredMessages);
       });
-      if (hasErrors) process.exit(1);
-      console.log('🚀 ~ file: lint.js ~ line 440 ~ resultArr', resultArr);
-      res.send(resultArr);
-    });
+  }
 
-    function checkFile(file, cb) {
-      //   console.log('🚀 ~ file: lint.js ~ line 407 ~ checkFile ~ file', file);
-      remark()
-        // TODO: fix MD lint rules
-        // .use(linterRules)
-        .use(validateLinks, {})
-        .use(validateExternalLinks, {
-          skipLocalhost: true,
-          skipUrlPatterns: ['https://github.com', '//s3.amazonaws.com'],
-          gotOptions: {
-            // baseUrl: 'https://developer-beta.bigcommerce.com',
-            baseUrl: 'https://developer.bigcommerce.com',
-          },
-        })
-        .use(writeGood, {
-          checks: dateFormat,
-          whitelist: ignoreWords,
-        })
-        .use(writeGood, {
-          checks: ellipses,
-          whitelist: ignoreWords,
-        })
-        .use(writeGood, {
-          checks: emdash,
-          whitelist: ignoreWords,
-        })
-        .use(writeGood, {
-          checks: exclamation,
-          whitelist: ignoreWords,
-        })
-        .use(writeGood, {
-          checks: general,
-          whitelist: ignoreWords,
-        })
-        .use(writeGood, {
-          checks: firstPerson,
-          whitelist: ignoreWords,
-        })
-        .use(writeGood, {
-          checks: writeGoodExtension,
-          whitelist: ignoreWords.concat('In order to'),
-          // ignore: ignoreWords.concat(['in order to']),
-        })
-        // TODO: consolidate some writeGood modules
-        .use(
-          remark2retext,
-          retext() // Convert markdown to plain text
-            // TODO: configure readability thresholds to make it useful
-            // .use(readability, readabilityConfig || {})
-            // TODO: configure simplify to be less sensitive
-            .use(simplify, {
-              ignore: ignoreWords.concat([
-                'multiple',
-                'render',
-                'forward',
-                'should',
-                'in order to',
-              ]),
-            })
-            .use(writeGoodWordNode, {
-              whitelist: ignoreWords.concat(['as']),
-              checks: glossery,
-            })
-            .use(equality, {
-              ignore: ignoreWords.concat([
-                'just',
-                'easy',
-                'disable',
-                'disabled',
-                'host',
-              ]),
-            })
-            .use(syntaxURLS)
-            // .use(intensify, {
-            //   ignore: ignoreWords.concat([]),
-            // })
-            .use(repeatedWords)
-            .use(indefiniteArticles)
-            .use(assuming, {
-              ignore: ignoreWords.concat([]),
-            })
-            // TODO: have spell not check URLS or file names
-            .use(spell, {
-              dictionary: dictionary,
-              ignore: ignoreWords.concat([]),
-              ignoreLiteral: true,
-            })
-        )
-        // plugin to enable, disable, and ignore messages.
-        .use(control, {
-          name: 'quality-docs',
-          source: [
-            'remark-lint',
-            'remark-lint-write-good',
-            'retext-readability',
-            'retext-simplify',
-            'retext-equality',
-            'retext-intensify',
-            'retext-google-styleguide',
-          ],
-        })
-        .process(file, function (err, results) {
-          var filteredMessages = [];
-          results.messages.forEach((message) => {
-            var hasFatalRuleId = _.includes(fatalRules, message.ruleId);
-            var hasFatalSource = _.includes(fatalRules, message.source);
-            var hasSuggestedRuleId = _.includes(suggestRules, message.ruleId);
-            var hasSuggestedSource = _.includes(suggestRules, message.source);
-
-            if (suggestRules && (hasSuggestedRuleId || hasSuggestedSource)) {
-              message.message = message.message.replace(
-                /don\’t use “(.*)”/gi,
-                (match, word) => {
-                  return 'Use “' + word + '” sparingly';
-                }
-              );
-              delete message.fatal;
-            }
-
-            if (fatalRules && (hasFatalRuleId || hasFatalSource)) {
-              message.fatal = true;
-            }
-
-            filteredMessages.push(message);
-          });
-          results.messages = filteredMessages;
-          // console.log('🚀 ~ file: lint.js ~ line 520 ~ results', results);
-          cb(null, results);
-        });
-    }
-  });
+  checkFile(new VFile(stream.toString('utf-8')));
 });
 
 export default apiRoute;
