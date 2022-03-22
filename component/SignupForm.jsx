@@ -91,7 +91,10 @@ const SignupForm = () => {
         onSubmit={async (values, { setSubmitting }) => {
           async function postData(url, data) {
             let formData = new FormData();
-            console.log("🚀 ~ file: SignupForm.jsx ~ line 95 ~ postData ~ selectedFile", selectedFile)
+            console.log(
+              '🚀 ~ file: SignupForm.jsx ~ line 95 ~ postData ~ selectedFile',
+              selectedFile
+            );
             formData.append('file', selectedFile);
             const response = await fetch(url, {
               method: 'POST',
@@ -104,7 +107,7 @@ const SignupForm = () => {
           setSubmitting(false);
         }}
       >
-        <Form>
+        <Form netlify>
           {/* <MyTextInput
             label="branch"
             name="branch"
