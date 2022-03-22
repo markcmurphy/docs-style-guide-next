@@ -58,184 +58,74 @@ function ListItem(props) {
 }
 
 function NumberList(props) {
+  console.log(
+    '🚀 ~ file: SignupForm.jsx ~ line 61 ~ NumberList ~ props',
+    props
+  );
   const numbers = props.numbers;
-  const listItems = numbers.map((number) =>
-    <ListItem key={number.toString()} value={number} />
-  );
-  return (
-    <ul>
-      {listItems}
-    </ul>
-  );
-}
-
-function checkFile(file, cb) {
-  remark()
-    // TODO: fix MD lint rules
-    // .use(linterRules)
-    .use(validateLinks, {})
-    .use(validateExternalLinks, {
-      skipLocalhost: true,
-      skipUrlPatterns: ['https://github.com', '//s3.amazonaws.com'],
-      gotOptions: {
-        // baseUrl: 'https://developer-beta.bigcommerce.com',
-        baseUrl: 'https://developer.bigcommerce.com',
-      },
-    })
-    .use(writeGood, {
-      checks: dateFormat,
-      whitelist: ignoreWords,
-    })
-    .use(writeGood, {
-      checks: ellipses,
-      whitelist: ignoreWords,
-    })
-    .use(writeGood, {
-      checks: emdash,
-      whitelist: ignoreWords,
-    })
-    .use(writeGood, {
-      checks: exclamation,
-      whitelist: ignoreWords,
-    })
-    .use(writeGood, {
-      checks: general,
-      whitelist: ignoreWords,
-    })
-    .use(writeGood, {
-      checks: firstPerson,
-      whitelist: ignoreWords,
-    })
-    .use(writeGood, {
-      checks: writeGoodExtension,
-      whitelist: ignoreWords.concat('In order to'),
-      // ignore: ignoreWords.concat(['in order to']),
-    })
-    // TODO: consolidate some writeGood modules
-    .use(
-      remark2retext,
-      retext() // Convert markdown to plain text
-        // TODO: configure readability thresholds to make it useful
-        // .use(readability, readabilityConfig || {})
-        // TODO: configure simplify to be less sensitive
-        .use(simplify, {
-          ignore: ignoreWords.concat([
-            'multiple',
-            'render',
-            'forward',
-            'should',
-            'in order to',
-          ]),
-        })
-        .use(writeGoodWordNode, {
-          whitelist: ignoreWords.concat(['as']),
-          checks: glossery,
-        })
-        .use(equality, {
-          ignore: ignoreWords.concat([
-            'just',
-            'easy',
-            'disable',
-            'disabled',
-            'host',
-          ]),
-        })
-        .use(syntaxURLS)
-        // .use(intensify, {
-        //   ignore: ignoreWords.concat([]),
-        // })
-        .use(repeatedWords)
-        .use(indefiniteArticles)
-        .use(assuming, {
-          ignore: ignoreWords.concat([]),
-        })
-        // TODO: have spell not check URLS or file names
-        .use(spell, {
-          dictionary: dictionary,
-          ignore: ignoreWords.concat([]),
-          ignoreLiteral: true,
-        })
-    )
-    // plugin to enable, disable, and ignore messages.
-    .use(control, {
-      name: 'quality-docs',
-      source: [
-        'remark-lint',
-        'remark-lint-write-good',
-        'retext-readability',
-        'retext-simplify',
-        'retext-equality',
-        'retext-intensify',
-        'retext-google-styleguide',
-      ],
-    })
-    .process(file, function (err, results) {
-      var filteredMessages = [];
-      results.messages.forEach((message) => {
-        var hasFatalRuleId = _.includes(fatalRules, message.ruleId);
-        var hasFatalSource = _.includes(fatalRules, message.source);
-        var hasSuggestedRuleId = _.includes(suggestRules, message.ruleId);
-        var hasSuggestedSource = _.includes(suggestRules, message.source);
-
-        if (suggestRules && (hasSuggestedRuleId || hasSuggestedSource)) {
-          message.message = message.message.replace(
-            /don\’t use “(.*)”/gi,
-            (match, word) => {
-              return 'Use “' + word + '” sparingly';
-            }
-          );
-          delete message.fatal;
-        }
-
-        if (fatalRules && (hasFatalRuleId || hasFatalSource)) {
-          message.fatal = true;
-        }
-
-        filteredMessages.push(message);
-      });
-      results.messages = filteredMessages;
-      cb(null, results);
-    });
+  const listItems = numbers.map((number) => (
+    <ListItem key={number.toString()} value={number.message} />
+  ));
+  return <ul>{listItems}</ul>;
 }
 
 const SignupForm = () => {
   const [errors, setErrors] = useState([]);
   const [errorDisplay, setErrorDisplay] = useState('');
+  const [selectedFile, setSelectedFile] = useState();
+  const [isSelected, setIsSelected] = useState(false);
+  // const [results, setResults] = useState();
+
+  const changeHandler = (event) => {
+    setSelectedFile(event.target.files[0]);
+    setIsSelected(true);
+  };
 
   return (
     <>
       <h1>Tester!</h1>
       <Formik
         initialValues={{
-          branch: '',
-          projectId: '',
+          file: null,
         }}
         onSubmit={async (values, { setSubmitting }) => {
-          console.log(
-            '🚀 ~ file: SignupForm.jsx ~ line 112 ~ onSubmit={ ~ values',
-            values
-          );
-
-          async function postData(url = '', data = {}) {
+          async function postData(url, data) {
+            let formData = new FormData();
+            console.log("🚀 ~ file: SignupForm.jsx ~ line 95 ~ postData ~ selectedFile", selectedFile)
+            formData.append('file', selectedFile);
             const response = await fetch(url, {
               method: 'POST',
-              body: JSON.stringify(data),
+              body: formData,
             });
             return response.json();
           }
-          const result = await postData('/api/brokenSlugs', values);
-          result.length ? setErrorDisplay('Results:') : setErrorDisplay('No results found!') 
+          const result = await postData('/api/lint', values);
           setErrors(result);
           setSubmitting(false);
         }}
       >
         <Form>
-          <MyTextInput
+          {/* <MyTextInput
             label="branch"
             name="branch"
             type="text"
             placeholder="new-branch"
-          />
+          /> */}
+          <input type="file" name="file" onChange={changeHandler} />
+          {/* {isSelected ? (
+            <div>
+              <p>Filename: {selectedFile.name}</p>
+              <p>Filetype: {selectedFile.type}</p>
+              <p>Size in bytes: {selectedFile.size}</p>
+              <p>
+                lastModifiedDate:{' '}
+                {selectedFile.lastModifiedDate.toLocaleDateString()}
+              </p>
+            </div>
+          ) : (
+            <p>Select a file to show details</p>
+          )} */}
+
           {/* <MySelect label="Project" name="projectId">
             <option value="">Select a project</option>
             <option value="cHJqOjIwNjAz">API-Reference</option>
@@ -256,4 +146,3 @@ const SignupForm = () => {
 };
 
 export { SignupForm };
-

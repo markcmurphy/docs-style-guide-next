@@ -69,7 +69,7 @@ const apiRoute = nextConnect({
   },
 });
 
-const uploadMiddleware = upload.single('test');
+const uploadMiddleware = upload.single('file');
 
 apiRoute.use(uploadMiddleware);
 
@@ -103,7 +103,7 @@ apiRoute.use(uploadMiddleware);
 
 // export default async function handler(req, res) {
 apiRoute.post((req, res) => {
-  //   console.log(req);
+  console.log(req.body);
   //   if (req.method === 'POST') {
   //   let doc =
   //     "# BigCommerce Channels Overview BigCommerces Channel Manager is the central place for merchants to discover, connect to, and manage their sales channels, including external channels like eBay, Amazon, Facebook, and Instagram. These external sales channels can extend the merchant's control panel experience in a number of ways, such as pushing orders from these external channels into the control panel alongside their BigCommerce storefront orders, allowing them to be fulfilled in the same way, and managing products on these channel from within the control panel in many of the same ways as they do for their BigCommerce storefronts.";
@@ -436,6 +436,7 @@ apiRoute.post((req, res) => {
         });
       });
       if (hasErrors) process.exit(1);
+      console.log('🚀 ~ file: lint.js ~ line 440 ~ resultArr', resultArr);
       res.send(resultArr);
     });
 
