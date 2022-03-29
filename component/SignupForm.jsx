@@ -54,7 +54,6 @@ const MySelect = ({ label, ...props }) => {
 };
 
 function ListItem({ value }) {
-  console.log("🚀 ~ file: SignupForm.jsx ~ line 57 ~ ListItem ~ props", value)
   return (
     <li>
       <b>Line:</b> {value.line} <b>Message:</b> {value.message}
@@ -65,7 +64,6 @@ function ListItem({ value }) {
 function NumberList(props) {
   const numbers = props.numbers;
   const listItems = numbers.messages?.map((number, index) => (
-    // console.log(number)
     <ListItem key={index} value={number} />
   ));
   return <ol>{listItems}</ol>;
@@ -76,7 +74,6 @@ const SignupForm = () => {
   const [errorDisplay, setErrorDisplay] = useState('');
   const [selectedFile, setSelectedFile] = useState();
   const [isSelected, setIsSelected] = useState(false);
-  // const [results, setResults] = useState();
 
   const changeHandler = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -93,10 +90,6 @@ const SignupForm = () => {
         onSubmit={async (values, { setSubmitting }) => {
           async function postData(url) {
             let formData = new FormData();
-            console.log(
-              '🚀 ~ file: SignupForm.jsx ~ line 95 ~ postData ~ selectedFile',
-              selectedFile
-            );
             formData.append('file', selectedFile);
             const response = await fetch(url, {
               method: 'POST',
