@@ -57,11 +57,6 @@ const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
-  // });
-  // storage: multer.diskStorage({
-  //   destination: './public/uploads',
-  //   filename: (req, file, cb) => cb(null, file.originalname),
-  // }),
 });
 
 const apiRoute = nextConnect({
@@ -380,38 +375,38 @@ apiRoute.post((req, res) => {
       // TODO: fix MD lint rules
       // .use(linterRules)
       .use(validateLinks, {})
-      .use(validateExternalLinks, {
-        skipLocalhost: true,
-        skipUrlPatterns: ['https://github.com', '//s3.amazonaws.com'],
-        gotOptions: {
-          // baseUrl: 'https://developer-beta.bigcommerce.com',
-          baseUrl: 'https://developer.bigcommerce.com',
-        },
-      })
-      .use(writeGood, {
-        checks: dateFormat,
-        whitelist: ignoreWords,
-      })
-      .use(writeGood, {
-        checks: ellipses,
-        whitelist: ignoreWords,
-      })
-      .use(writeGood, {
-        checks: emdash,
-        whitelist: ignoreWords,
-      })
-      .use(writeGood, {
-        checks: exclamation,
-        whitelist: ignoreWords,
-      })
-      .use(writeGood, {
-        checks: general,
-        whitelist: ignoreWords,
-      })
-      .use(writeGood, {
-        checks: firstPerson,
-        whitelist: ignoreWords,
-      })
+      // .use(validateExternalLinks, {
+      //   skipLocalhost: true,
+      //   skipUrlPatterns: ['https://github.com', '//s3.amazonaws.com'],
+      //   gotOptions: {
+      //     // baseUrl: 'https://developer-beta.bigcommerce.com',
+      //     baseUrl: 'https://developer.bigcommerce.com',
+      //   },
+      // })
+      // .use(writeGood, {
+      //   checks: dateFormat,
+      //   whitelist: ignoreWords,
+      // })
+      // .use(writeGood, {
+      //   checks: ellipses,
+      //   whitelist: ignoreWords,
+      // })
+      // .use(writeGood, {
+      //   checks: emdash,
+      //   whitelist: ignoreWords,
+      // })
+      // .use(writeGood, {
+      //   checks: exclamation,
+      //   whitelist: ignoreWords,
+      // })
+      // .use(writeGood, {
+      //   checks: general,
+      //   whitelist: ignoreWords,
+      // })
+      // .use(writeGood, {
+      //   checks: firstPerson,
+      //   whitelist: ignoreWords,
+      // })
       .use(writeGood, {
         checks: writeGoodExtension,
         whitelist: ignoreWords.concat('In order to'),
@@ -452,15 +447,15 @@ apiRoute.post((req, res) => {
           // })
           .use(repeatedWords)
           .use(indefiniteArticles)
-          // .use(assuming, {
-          //   ignore: ignoreWords.concat([]),
-          // })
-          // TODO: have spell not check URLS or file names
-          .use(spell, {
-            dictionary: dictionary,
-            ignore: ignoreWords.concat([]),
-            ignoreLiteral: true,
-          })
+        // .use(assuming, {
+        //   ignore: ignoreWords.concat([]),
+        // })
+        // TODO: have spell not check URLS or file names
+        // .use(spell, {
+        //   dictionary: dictionary,
+        //   ignore: ignoreWords.concat([]),
+        //   ignoreLiteral: true,
+        // })
       )
       // plugin to enable, disable, and ignore messages.
       .use(control, {
