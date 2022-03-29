@@ -53,20 +53,22 @@ const MySelect = ({ label, ...props }) => {
   );
 };
 
-function ListItem(props) {
-  return <li>{props.value}</li>;
+function ListItem({ value }) {
+  console.log("🚀 ~ file: SignupForm.jsx ~ line 57 ~ ListItem ~ props", value)
+  return (
+    <li>
+      <b>Line:</b> {value.line} <b>Message:</b> {value.message}
+    </li>
+  );
 }
 
 function NumberList(props) {
-  console.log(
-    '🚀 ~ file: SignupForm.jsx ~ line 61 ~ NumberList ~ props',
-    props
-  );
   const numbers = props.numbers;
-  const listItems = numbers.map((number) => (
-    <ListItem key={number.toString()} value={number.message} />
+  const listItems = numbers.messages?.map((number, index) => (
+    // console.log(number)
+    <ListItem key={index} value={number} />
   ));
-  return <ul>{listItems}</ul>;
+  return <ol>{listItems}</ol>;
 }
 
 const SignupForm = () => {
@@ -83,13 +85,13 @@ const SignupForm = () => {
 
   return (
     <>
-      <h1>Tester!</h1>
+      <h1>Linter!</h1>
       <Formik
         initialValues={{
           file: null,
         }}
         onSubmit={async (values, { setSubmitting }) => {
-          async function postData(url, data) {
+          async function postData(url) {
             let formData = new FormData();
             console.log(
               '🚀 ~ file: SignupForm.jsx ~ line 95 ~ postData ~ selectedFile',
@@ -101,13 +103,13 @@ const SignupForm = () => {
               body: formData,
             });
             return response.json();
-          }
-          const result = await postData('/api/lint', values);
+          }         
+          const result = await postData('/api/lint');
           setErrors(result);
           setSubmitting(false);
         }}
       >
-        <Form netlify>
+        <Form netlify="true">
           {/* <MyTextInput
             label="branch"
             name="branch"
@@ -140,6 +142,7 @@ const SignupForm = () => {
       </Formik>
       {/* <div style={{ display: errors.length ? 'block' : 'none' }}> */}
       <div>
+        {/* //TODO: add status spinner */}
         {/* style={{ display: showInfo ? 'block' : 'none' }} */}
         {errorDisplay}
         <NumberList numbers={errors} />

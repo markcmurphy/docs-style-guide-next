@@ -51,6 +51,7 @@ import { json } from 'express';
 import multer from 'multer';
 import nextConnect from 'next-connect';
 import { VFile } from 'vfile';
+import { reporter } from 'vfile-reporter';
 
 const storage = multer.memoryStorage();
 
@@ -374,7 +375,7 @@ apiRoute.post((req, res) => {
 
   const stream = req.file.buffer;
 
-  function checkFile(file) {
+  function checkFile(filez) {
     remark()
       // TODO: fix MD lint rules
       // .use(linterRules)
@@ -423,15 +424,15 @@ apiRoute.post((req, res) => {
           // TODO: configure readability thresholds to make it useful
           // .use(readability, readabilityConfig || {})
           // TODO: configure simplify to be less sensitive
-          .use(simplify, {
-            ignore: ignoreWords.concat([
-              'multiple',
-              'render',
-              'forward',
-              'should',
-              'in order to',
-            ]),
-          })
+          // .use(simplify, {
+          //   ignore: ignoreWords.concat([
+          //     'multiple',
+          //     'render',
+          //     'forward',
+          //     'should',
+          //     'in order to',
+          //   ]),
+          // })
           .use(writeGoodWordNode, {
             whitelist: ignoreWords.concat(['as']),
             checks: glossery,
@@ -451,9 +452,9 @@ apiRoute.post((req, res) => {
           // })
           .use(repeatedWords)
           .use(indefiniteArticles)
-          .use(assuming, {
-            ignore: ignoreWords.concat([]),
-          })
+          // .use(assuming, {
+          //   ignore: ignoreWords.concat([]),
+          // })
           // TODO: have spell not check URLS or file names
           .use(spell, {
             dictionary: dictionary,
@@ -474,36 +475,54 @@ apiRoute.post((req, res) => {
           'retext-google-styleguide',
         ],
       })
-      .process(file, function (err, results) {
-        var filteredMessages = [];
+      .process(filez)
+      .then(
+        (output) => {
+          console.log(
+            '🚀 ~ file: lint.js ~ line 481 ~ checkFile ~ output',
+            typeof output
+          );
 
-        results.messages.forEach((message) => {
-          var hasFatalRuleId = _.includes(fatalRules, message.ruleId);
-          var hasFatalSource = _.includes(fatalRules, message.source);
-          var hasSuggestedRuleId = _.includes(suggestRules, message.ruleId);
-          var hasSuggestedSource = _.includes(suggestRules, message.source);
+          // console.error(reporter(output));
+          // res.send(String(output));
+          res.send(output);
+        },
+        (error) => {
+          // Handle your error here!
+          throw error;
+        }
+      );
+    // function (err, results) {
+    //   var filteredMessages = [];
+    //   results.messages.forEach((message) => {
+    //     filteredMessages.push(message);
+    //   });
 
-          if (suggestRules && (hasSuggestedRuleId || hasSuggestedSource)) {
-            message.message = message.message.replace(
-              /don\’t use “(.*)”/gi,
-              (match, word) => {
-                return 'Use “' + word + '” sparingly';
-              }
-            );
-            delete message.fatal;
-          }
+    //   var hasFatalRuleId = _.includes(fatalRules, message.ruleId);
+    //   var hasFatalSource = _.includes(fatalRules, message.source);
+    //   var hasSuggestedRuleId = _.includes(suggestRules, message.ruleId);
+    //   var hasSuggestedSource = _.includes(suggestRules, message.source);
 
-          if (fatalRules && (hasFatalRuleId || hasFatalSource)) {
-            message.fatal = true;
-          }
+    //   if (suggestRules && (hasSuggestedRuleId || hasSuggestedSource)) {
+    //     message.message = message.message.replace(
+    //       /don\’t use “(.*)”/gi,
+    //       (match, word) => {
+    //         return 'Use “' + word + '” sparingly';
+    //       }
+    //     );
+    //     delete message.fatal;
+    //   }
 
-          filteredMessages.push(message);
-        });
-        res.send(filteredMessages);
-      });
+    //   if (fatalRules && (hasFatalRuleId || hasFatalSource)) {
+    //     message.fatal = true;
+    //   }
+    // }
+    // );
+    // res.send(filteredMessages);
   }
 
-  checkFile(new VFile(stream.toString('utf-8')));
+  let fileToCheck = new VFile(stream.toString('utf-8'));
+  checkFile(fileToCheck.value);
 });
 
 export default apiRoute;
