@@ -109,7 +109,7 @@ const SignupForm = () => {
           setSubmitting(false);
         }}
       >
-        <Form netlify="true">
+        <Form>
           {/* <MyTextInput
             label="branch"
             name="branch"
