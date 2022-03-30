@@ -4,7 +4,7 @@ const _ = require('lodash');
 const argv = require('minimist')(process.argv.slice(2));
 const chalk = require('chalk');
 const en_US = require('dictionary-en-us');
-const fs = require('fs');
+// const fs = require('fs');
 // const lint = require('remark-lint-maximum-line-length');
 // const lint = require('remark-cli');
 // const lint = require('remark-preset-lint-markdown-style-guide');
@@ -406,11 +406,11 @@ const apiRoute = nextConnect({
       //   checks: firstPerson,
       //   whitelist: ignoreWords,
       // })
-      .use(writeGood, {
-        checks: writeGoodExtension,
-        whitelist: ignoreWords.concat('In order to'),
-        // ignore: ignoreWords.concat(['in order to']),
-      })
+      // .use(writeGood, {
+      //   checks: writeGoodExtension,
+      //   whitelist: ignoreWords.concat('In order to'),
+      //   // ignore: ignoreWords.concat(['in order to']),
+      // })
       // TODO: consolidate some writeGood modules
       .use(
         remark2retext,
@@ -427,10 +427,10 @@ const apiRoute = nextConnect({
           //     'in order to',
           //   ]),
           // })
-          .use(writeGoodWordNode, {
-            whitelist: ignoreWords.concat(['as']),
-            checks: glossery,
-          })
+          // .use(writeGoodWordNode, {
+          //   whitelist: ignoreWords.concat(['as']),
+          //   checks: glossery,
+          // })
           .use(equality, {
             ignore: ignoreWords.concat([
               'just',
