@@ -9,7 +9,7 @@ const fs = require('fs');
 // const lint = require('remark-cli');
 // const lint = require('remark-preset-lint-markdown-style-guide');
 const map = require('async/map');
-const meow = require('meow');
+// const meow = require('meow');
 const path = require('path');
 const remark = require('remark');
 const remark2retext = require('remark-retext');
@@ -31,7 +31,7 @@ const syntaxURLS = require('retext-syntax-urls');
 const repeatedWords = require('retext-repeated-words');
 const indefiniteArticles = require('retext-indefinite-article');
 const assuming = require('retext-assuming');
-const readability = require('retext-readability');
+// const readability = require('retext-readability');
 const simplify = require('retext-simplify');
 
 // writeGood modules
