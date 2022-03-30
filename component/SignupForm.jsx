@@ -78,7 +78,6 @@ const SignupForm = () => {
 
   const changeHandler = (event) => {
     // setSelectedFile(event.target.files[0]);
-    console.log("🚀 ~ file: SignupForm.jsx ~ line 82 ~ changeHandler ~ event.target.value", event.target.value)
     setFormBody(event.target.value);
     setIsSelected(true);
   };
@@ -91,8 +90,7 @@ const SignupForm = () => {
           // file: null,
           // markdown: 'dfg'
         }}
-        onSubmit={async (values, { setSubmitting }) => {          
-          console.log("🚀 ~ file: SignupForm.jsx ~ line 108 ~ onSubmit={ ~ values", values)
+        onSubmit={async (values, { setSubmitting }) => {
           async function postData(url) {
             // let formData = new FormData();
             // formData.append('file', formBody);
