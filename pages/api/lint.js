@@ -35,17 +35,17 @@ const assuming = require('retext-assuming');
 const simplify = require('retext-simplify');
 
 // writeGood modules
-const writeGoodWordNode = require('./modules/write-good/index.js');
-const writeGood = require('remark-lint-write-good');
-const writeGoodExtension = require('./modules/write-good/writeGoodExtension.js');
-const firstPerson = require('./modules/write-good/firstPerson.js');
-const genderBias = require('./modules/write-good/genderBias.js');
-const dateFormat = require('./modules/write-good/dateFormat.js');
-const ellipses = require('./modules/write-good/ellipses.js');
-const emdash = require('./modules/write-good/emdash.js');
-const exclamation = require('./modules/write-good/exclamation.js');
-const general = require('./modules/write-good/general.js');
-const glossery = require('./modules/write-good/glossery.js');
+// const writeGoodWordNode = require('./modules/write-good/index.js');
+// const writeGood = require('remark-lint-write-good');
+// const writeGoodExtension = require('./modules/write-good/writeGoodExtension.js');
+// const firstPerson = require('./modules/write-good/firstPerson.js');
+// const genderBias = require('./modules/write-good/genderBias.js');
+// const dateFormat = require('./modules/write-good/dateFormat.js');
+// const ellipses = require('./modules/write-good/ellipses.js');
+// const emdash = require('./modules/write-good/emdash.js');
+// const exclamation = require('./modules/write-good/exclamation.js');
+// const general = require('./modules/write-good/general.js');
+// const glossery = require('./modules/write-good/glossery.js');
 
 import { json } from 'express';
 // import multer from 'multer';
