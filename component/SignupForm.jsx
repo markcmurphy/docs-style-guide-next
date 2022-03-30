@@ -74,9 +74,12 @@ const SignupForm = () => {
   const [errorDisplay, setErrorDisplay] = useState('');
   const [selectedFile, setSelectedFile] = useState();
   const [isSelected, setIsSelected] = useState(false);
+  const [formBody, setFormBody] = useState('');
 
   const changeHandler = (event) => {
-    setSelectedFile(event.target.files[0]);
+    // setSelectedFile(event.target.files[0]);
+    console.log("🚀 ~ file: SignupForm.jsx ~ line 82 ~ changeHandler ~ event.target.value", event.target.value)
+    setFormBody(event.target.value);
     setIsSelected(true);
   };
 
@@ -85,15 +88,17 @@ const SignupForm = () => {
       <h1>Linter!</h1>
       <Formik
         initialValues={{
-          file: null,
+          // file: null,
+          // markdown: 'dfg'
         }}
-        onSubmit={async (values, { setSubmitting }) => {
+        onSubmit={async (values, { setSubmitting }) => {          
+          console.log("🚀 ~ file: SignupForm.jsx ~ line 108 ~ onSubmit={ ~ values", values)
           async function postData(url) {
-            let formData = new FormData();
-            formData.append('file', selectedFile);
+            // let formData = new FormData();
+            // formData.append('file', formBody);
             const response = await fetch(url, {
               method: 'POST',
-              body: formData,
+              body: formBody,
             });
             return response.json();
           }         
@@ -103,13 +108,14 @@ const SignupForm = () => {
         }}
       >
         <Form>
-          {/* <MyTextInput
-            label="branch"
-            name="branch"
+          <MyTextInput
+            // label="branch"
+            name="markdown"
             type="text"
-            placeholder="new-branch"
-          /> */}
-          <input type="file" name="file" onChange={changeHandler} />
+            onChange={changeHandler}
+            // placeholder="new-branch"
+          />
+          {/* <input type="file" name="file" onChange={changeHandler} /> */}
           {/* {isSelected ? (
             <div>
               <p>Filename: {selectedFile.name}</p>
@@ -123,6 +129,7 @@ const SignupForm = () => {
           ) : (
             <p>Select a file to show details</p>
           )} */}
+          
 
           {/* <MySelect label="Project" name="projectId">
             <option value="">Select a project</option>
